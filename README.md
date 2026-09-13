@@ -9,9 +9,9 @@ Web běží na **jednom vlastním tématu** (`wp-content/themes/kolf-web`) bez p
 builderu a bez SEO/formulářových pluginů:
 
 - Layout a texty jsou přímo v PHP šablonách (žádný Elementor/Divi).
-- Oddělení a ambulance (`oddeleni`) a zdravotnické služby (`sluzba`) jsou
-  vlastní custom post types s jednoduchými meta boxy — editace v adminu bez
-  ACF.
+- Oddělení (`oddeleni`), Osoby (`osoba`), Telefony (`telefon`, jen na pozadí),
+  Hodiny (`hodiny`, jen na pozadí) a Zdravotnické služby (`sluzba`) jsou
+  vlastní custom post types s jednoduchými meta boxy — editace v adminu bez ACF.
 - Živé vyhledávání v oddělení je čistý JS (žádné jQuery, žádná knihovna).
 - Jediný externí request navíc je na Google Fonts (Source Serif 4, IBM Plex
   Sans, IBM Plex Mono) — dá se v budoucnu i self-hostovat pro ještě rychlejší
@@ -31,20 +31,48 @@ wp-content/themes/kolf-web/
 ├── functions.php            # bootstrap, enqueue assetů
 ├── header.php / footer.php
 ├── front-page.php           # úvodní stránka (hero, hledání, patra, služby, kontakt)
-├── archive-oddeleni.php     # telefonní seznam — Oddělení / Osoby
-├── single-oddeleni.php      # detail jednoho oddělení
+├── archive-oddeleni.php     # kompletní seznam oddělení (podle patra)
+├── single-oddeleni.php      # detail jednoho oddělení (+ jeho lidé a telefony)
+├── archive-osoba.php        # kompletní seznam osob (podle příjmení)
+├── single-osoba.php         # detail jedné osoby (+ oddělení a telefony)
 ├── page.php / index.php     # obecné stránky / fallback
 ├── inc/
-│   ├── post-types.php       # CPT "oddeleni" a "sluzba"
-│   ├── meta-boxes.php       # vlastní meta boxy (patro, kontakt, pořadí…)
+│   ├── post-types.php       # CPT "oddeleni", "osoba", "telefon", "hodiny", "sluzba"
+│   ├── meta-boxes.php       # vlastní meta boxy + opakovatelné seznamy telefonů/hodin
 │   ├── customizer.php       # editovatelné kontaktní údaje (telefon, e-mail, adresa)
-│   ├── helpers.php          # dotazy nad CPT (seskupení podle patra, rychlá čísla…)
-│   ├── seed-content.php     # jednorázové naplnění 34 oddělení + 5 služeb
+│   ├── helpers.php          # dotazy nad CPT (patra, telefony, hodiny, osoby podle oddělení…)
+│   ├── seed-content.php     # naplnění obsahu z reálné produkční DB (viz níže)
+│   ├── data/                # vygenerovaná data z MSSQL exportu (Department/Person/Phone/DayClock)
 │   └── performance.php      # úklid výstupu
 └── assets/
-    ├── css/style.css        # veškerý vizuální styl, CSS custom properties
-    └── js/department-search.js
+    ├── css/style.css              # veškerý vizuální styl, CSS custom properties
+    ├── css/admin-repeaters.css    # drobné doladění opakovatelných seznamů v adminu
+    ├── js/department-search.js
+    ├── js/admin-phone-repeater.js  # tlačítko "+ Přidat číslo" v adminu
+    └── js/admin-hours-repeater.js  # tlačítko "+ Přidat rozvrh" v adminu
 ```
+
+### Datový model
+
+```
+oddeleni (1) ──── (N) osoba     — osoba patří max. do jednoho oddělení (kolf_department_id)
+oddeleni (1) ──── (N) telefon   — telefon patřící oddělení
+osoba    (1) ──── (N) telefon   — telefon patřící osobě
+oddeleni (1) ──── (N) hodiny    — rozvrh (ordinační/provozní hodiny) patřící oddělení
+osoba    (1) ──── (N) hodiny    — rozvrh patřící osobě
+```
+
+`telefon` a `hodiny` nemají vlastní stránku ani položku v menu adminu — zadávají
+se přímo ve formuláři konkrétního oddělení nebo osoby (tlačítka „+ Přidat
+číslo“ / „+ Přidat rozvrh“), v databázi ale žijí jako samostatné záznamy.
+Produkční databáze (MSSQL `DayClock`) měla hodiny jen u osob — u oddělení
+jde nově přidat hodiny ručně v adminu, migrovaná data tam nejsou.
+
+Produkční databáze (MSSQL) neměla u osoby přímý cizí klíč na oddělení —
+při migraci (`inc/data/persons.php`) se spároval podle shodného čísla dveří,
+u pár desítek případů, kde se čísla neshodovala přesně, ručně podle patra a
+specializace (viz komentáře v souboru). V nové databázi je to ale uložené
+jako běžný cizí klíč, který si můžete v adminu u osoby kdykoliv přepnout.
 
 ## Lokální vývoj
 
@@ -66,7 +94,8 @@ uživatel/heslo `admin` / `password`). Konfigurace je v `.wp-env.json`.
 2. Zkopírujte/nalinkujte `wp-content/themes/kolf-web` do
    `wp-content/themes/` vaší instalace.
 3. V adminu aktivujte téma **Poliklinika KOLF** — při aktivaci se
-   automaticky naplní obsah (34 oddělení, 5 zdravotnických služeb).
+   automaticky naplní obsah reálnými daty z produkce (47 oddělení, 63 osob,
+   telefony, ordinační hodiny, 5 zdravotnických služeb).
 4. V **Nastavení → Čtení** nemusíte nic měnit, úvodní stránka se řídí
    šablonou `front-page.php` automaticky.
 
@@ -78,6 +107,11 @@ administrátor:
 ```
 /wp-admin/?kolf_reseed=1
 ```
+
+Pokud jste téma aktivovali už dřív (s první, ukázkovou verzí dat) a teď jen
+aktualizujete soubory tématu, aktivace se znovu nespustí sama — použijte
+tenhle odkaz ručně, ať se stará ukázková oddělení nahradí reálnými daty
+a založí se nové typy obsahu Osoby/Telefony.
 
 ## Co je potřeba doplnit před spuštěním
 

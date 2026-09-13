@@ -55,12 +55,13 @@ $services      = kolf_get_services();
 	</div>
 	<div class="kolf-floors__grid">
 		<?php foreach ( $floor_groups as $floor => $posts ) :
-			$names = wp_list_pluck( $posts, 'post_title' );
+			$names       = wp_list_pluck( $posts, 'post_title' );
+			$floor_value = 'none' === $floor ? null : $floor;
 			?>
 			<a href="<?php echo esc_url( home_url( '/oddeleni/' ) ); ?>" class="kolf-floor-card">
 				<div class="kolf-floor-card__head">
-					<span class="kolf-floor-card__num"><?php echo esc_html( kolf_floor_number_display( $floor ) ); ?></span>
-					<span class="kolf-floor-card__caption"><?php echo esc_html( $floors_meta[ $floor ] ?? kolf_floor_label( $floor ) ); ?></span>
+					<span class="kolf-floor-card__num"><?php echo esc_html( kolf_floor_number_display( $floor_value ) ); ?></span>
+					<span class="kolf-floor-card__caption"><?php echo esc_html( $floors_meta[ $floor ] ?? kolf_floor_label( $floor_value ) ); ?></span>
 				</div>
 				<p class="kolf-floor-card__list"><?php echo esc_html( implode( ' · ', $names ) ); ?></p>
 			</a>

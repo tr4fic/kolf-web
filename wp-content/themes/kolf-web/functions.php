@@ -48,7 +48,7 @@ function kolf_assets() {
 
 	if ( is_front_page() ) {
 		wp_enqueue_script( 'kolf-search', KOLF_URI . '/assets/js/department-search.js', array(), KOLF_VERSION, true );
-		wp_localize_script( 'kolf-search', 'kolfDepartments', kolf_get_departments_for_search() );
+		wp_localize_script( 'kolf-search', 'kolfDepartments', kolf_get_search_index() );
 		wp_localize_script( 'kolf-search', 'kolfSearchI18n', array(
 			'noResults' => sprintf(
 				/* translators: %s: telefonní číslo ústředny */
@@ -66,7 +66,7 @@ add_action( 'wp_enqueue_scripts', 'kolf_assets' );
 function kolf_nav_fallback() {
 	$items = array(
 		array( 'label' => __( 'Oddělení', 'kolf' ), 'url' => home_url( '/oddeleni/' ) ),
-		array( 'label' => __( 'Osoby', 'kolf' ), 'url' => home_url( '/oddeleni/?view=osoby' ) ),
+		array( 'label' => __( 'Osoby', 'kolf' ), 'url' => home_url( '/osoby/' ) ),
 		array( 'label' => __( 'Zdravotnické služby', 'kolf' ), 'url' => home_url( '/#sluzby' ) ),
 		array( 'label' => __( 'Kontakt', 'kolf' ), 'url' => home_url( '/#kontakt' ) ),
 	);

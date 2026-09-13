@@ -405,6 +405,15 @@ img { max-width: 100%; height: auto; display: block; }
 .kolf-single__meta { font-family: var(--font-mono); font-size: 16px; color: var(--color-text-muted); margin: 0 0 24px; }
 .kolf-single__back { display: inline-block; margin-top: 32px; }
 
+/* Hodiny (ordinační / provozní) */
+.kolf-hours { margin: 28px 0; padding: 24px; border: 1px solid var(--color-border); border-radius: 16px; }
+.kolf-hours__title { margin: 0 0 16px; font-family: var(--font-serif); font-size: 18px; font-weight: 600; }
+.kolf-hours__table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.kolf-hours__table th { text-align: left; font-weight: 400; color: var(--color-text-muted); padding: 6px 16px 6px 0; white-space: nowrap; }
+.kolf-hours__table td { text-align: left; font-family: var(--font-mono); padding: 6px 0; }
+.kolf-hours__table tr + tr th, .kolf-hours__table tr + tr td { border-top: 1px solid var(--color-border); }
+.kolf-hours__note { margin: 16px 0 0; font-size: 14px; color: var(--color-text-muted); }
+
 /* Responsive */
 @media (max-width: 900px) {
   :root { --container-pad: 24px; }
