@@ -1,0 +1,13 @@
+/*
+Theme Name: Poliklinika KOLF
+Theme URI: https://kolf.cz
+Author: Poliklinika KOLF s.r.o.
+Description: Vlastní odlehčené téma pro web Poliklinika KOLF Pardubice. Bez page builderů a bez závislosti na pluginech — cílem je rychlý, jednoduše udržovatelný web.
+Version: 1.0.0
+Requires at least: 6.4
+Requires PHP: 8.0
+Text Domain: kolf
+*/
+
+/* Vizuální styly jsou v assets/css/style.css (enqueued přes functions.php),
+   tento soubor slouží jen jako WordPress theme header. */

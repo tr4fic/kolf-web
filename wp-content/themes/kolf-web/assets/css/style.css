@@ -1,0 +1,424 @@
+/* Design tokens — odvozeno z Claude Design návrhu (Poliklinika Pardubice redesign) */
+:root {
+  --color-bg: #ffffff;
+  --color-text: #10131a;
+  --color-text-muted: #5c6470;
+  --color-text-faint: #8a93a0;
+  --color-placeholder: #97a0ac;
+  --color-accent: #2F5BD0;
+  --color-accent-hover: #1c3f9c;
+  --color-border: #e6e9ee;
+  --color-border-strong: #cdd4de;
+
+  --font-serif: 'Source Serif 4', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --container-max: 1180px;
+  --container-pad: 40px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+a:hover { color: var(--color-accent-hover); text-decoration: underline; }
+
+input { font-family: inherit; }
+::placeholder { color: var(--color-placeholder); }
+
+img { max-width: 100%; height: auto; display: block; }
+
+.kolf-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-pad);
+}
+
+/* Header */
+.kolf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.kolf-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.kolf-logo:hover { text-decoration: none; }
+.kolf-logo__name {
+  font-family: var(--font-serif);
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.kolf-logo__tag {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.kolf-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  font-size: 15px;
+  flex-wrap: wrap;
+}
+.kolf-nav a {
+  color: #3d4550;
+}
+.kolf-nav a:hover { color: var(--color-accent); }
+.kolf-nav__phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-accent);
+  color: #fff !important;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.kolf-nav__phone:hover { background: var(--color-accent-hover); text-decoration: none; }
+.kolf-nav-toggle { display: none; }
+
+/* Hero */
+.kolf-hero {
+  padding: 96px 0 72px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 72px;
+  align-items: start;
+}
+.kolf-hero__eyebrow {
+  margin: 0 0 22px;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.kolf-hero__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 68px;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  font-weight: 400;
+  text-wrap: balance;
+}
+.kolf-hero__lead {
+  margin: 28px 0 0;
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  max-width: 30em;
+  text-wrap: pretty;
+}
+
+/* Search */
+.kolf-search {
+  margin-top: 44px;
+  max-width: 520px;
+  position: relative;
+}
+.kolf-search__label {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin-bottom: 12px;
+}
+.kolf-search__input {
+  width: 100%;
+  padding: 18px 20px;
+  font-size: 17px;
+  color: var(--color-text);
+  background: #fff;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  outline: none;
+}
+.kolf-search__input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(47, 91, 208, 0.1);
+}
+.kolf-search__results {
+  margin-top: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: none;
+  background: #fff;
+}
+.kolf-search__results.is-open { display: block; }
+.kolf-search__result {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eef1f5;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.kolf-search__result:last-child { border-bottom: none; }
+.kolf-search__result:hover { background: #f6f8fb; text-decoration: none; }
+.kolf-search__result-name { font-size: 16px; }
+.kolf-search__result-meta {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+.kolf-search__empty { padding: 16px 20px; font-size: 15px; color: var(--color-text-faint); }
+
+/* Quick numbers card */
+.kolf-quick {
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 34px 32px;
+  margin-top: 8px;
+}
+.kolf-quick__title {
+  margin: 0 0 24px;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.kolf-quick__list { display: grid; gap: 20px; list-style: none; margin: 0; padding: 0; }
+.kolf-quick__item { display: grid; gap: 4px; }
+.kolf-quick__label {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.kolf-quick__number {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--color-text);
+}
+.kolf-quick__more {
+  display: block;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  font-size: 15px;
+}
+
+/* Section heading */
+.kolf-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-text);
+}
+.kolf-section-head h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* Floors ("Kde co najdete") */
+.kolf-floors { padding: 16px 0 84px; }
+.kolf-floors__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.kolf-floor-card {
+  display: block;
+  background: #fff;
+  padding: 28px 26px 30px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.kolf-floor-card:hover { background: #f6f8fb; text-decoration: none; }
+.kolf-floor-card__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.kolf-floor-card__num {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  line-height: 1;
+  color: var(--color-accent);
+}
+.kolf-floor-card__caption {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.kolf-floor-card__list {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--color-text-muted);
+  text-wrap: pretty;
+}
+
+/* Services */
+.kolf-services { padding: 0 0 96px; }
+.kolf-service {
+  display: grid;
+  grid-template-columns: 0.9fr 1.6fr;
+  gap: 56px;
+  padding: 36px 0;
+  border-bottom: 1px solid var(--color-border);
+  align-items: start;
+}
+.kolf-service__title {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.kolf-service__subtitle { margin: 0; font-size: 15px; color: var(--color-text-faint); }
+.kolf-service__body { margin: 0; font-size: 17px; line-height: 1.7; color: #3d4550; text-wrap: pretty; }
+.kolf-service__meta { margin: 16px 0 0; font-family: var(--font-mono); font-size: 13px; color: var(--color-text-faint); }
+
+/* Kontakt */
+.kolf-contact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  padding: 64px 0 90px;
+}
+.kolf-contact h2 {
+  margin: 0 0 26px;
+  font-family: var(--font-serif);
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+.kolf-contact__info { display: grid; gap: 18px; font-size: 17px; line-height: 1.6; }
+.kolf-contact__info a { font-family: var(--font-mono); }
+.kolf-contact__actions { margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap; }
+.kolf-btn-outline {
+  padding: 12px 20px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  font-size: 15px;
+  color: var(--color-text);
+}
+.kolf-btn-outline:hover { border-color: var(--color-accent); color: var(--color-accent); text-decoration: none; }
+.kolf-contact__media {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: 16px;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: repeating-linear-gradient(135deg, #fafbfc 0 10px, #f3f5f8 10px 20px);
+  overflow: hidden;
+}
+.kolf-contact__media img { width: 100%; height: 100%; object-fit: cover; }
+.kolf-contact__media span { font-family: var(--font-mono); font-size: 13px; color: var(--color-text-faint); }
+.kolf-contact__media span.small { font-size: 12px; color: #aab2bd; }
+
+/* Footer */
+.kolf-footer {
+  border-top: 1px solid var(--color-border);
+  padding: 26px 0 44px;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 14px;
+  color: var(--color-text-faint);
+  flex-wrap: wrap;
+}
+
+/* Directory (Oddělení / Osoby) */
+.kolf-directory { padding: 56px 0 96px; }
+.kolf-directory__tabs { display: flex; gap: 10px; margin: 28px 0 8px; }
+.kolf-directory__tab {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text);
+  font-size: 14px;
+}
+.kolf-directory__tab.is-active {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: #fff !important;
+}
+.kolf-directory__tab:hover { text-decoration: none; border-color: var(--color-accent); }
+.kolf-directory__group { margin-top: 40px; }
+.kolf-directory__group-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.kolf-directory__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+.kolf-directory__row:hover { text-decoration: none; }
+.kolf-directory__row-name { font-size: 16px; }
+.kolf-directory__row-meta { font-family: var(--font-mono); font-size: 13px; color: var(--color-text-faint); white-space: nowrap; }
+
+/* Single oddělení */
+.kolf-single { padding: 64px 0 96px; max-width: 720px; }
+.kolf-single__eyebrow { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent); margin: 0 0 16px; }
+.kolf-single__title { font-family: var(--font-serif); font-size: 44px; font-weight: 400; margin: 0 0 20px; letter-spacing: -0.02em; }
+.kolf-single__meta { font-family: var(--font-mono); font-size: 16px; color: var(--color-text-muted); margin: 0 0 24px; }
+.kolf-single__back { display: inline-block; margin-top: 32px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  :root { --container-pad: 24px; }
+  .kolf-hero { grid-template-columns: 1fr; gap: 40px; padding: 48px 0 40px; }
+  .kolf-hero__title { font-size: 42px; }
+  .kolf-floors__grid { grid-template-columns: 1fr; }
+  .kolf-service { grid-template-columns: 1fr; gap: 12px; }
+  .kolf-contact { grid-template-columns: 1fr; gap: 40px; padding: 40px 0 56px; }
+  .kolf-nav { gap: 18px; }
+}
+
+@media (max-width: 640px) {
+  .kolf-header { flex-wrap: wrap; padding: 18px 0; }
+  .kolf-nav { width: 100%; order: 3; justify-content: flex-start; gap: 14px 20px; padding-top: 14px; }
+  .kolf-hero__title { font-size: 32px; }
+  .kolf-footer { flex-direction: column; gap: 6px; }
+}

@@ -1,0 +1,24 @@
+# WordPress core (staženo přes wp-env / composer / manuální instalaci, necommitujeme)
+/wp-admin/
+/wp-includes/
+/wp-*.php
+/xmlrpc.php
+/index.php
+!/wp-content/themes/kolf-web/index.php
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/cache/
+/wp-content/plugins/
+!/wp-content/plugins/.gitkeep
+wp-config.php
+
+# Lokální nástroje
+node_modules/
+.wp-env-override.json
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
