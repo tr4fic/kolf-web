@@ -49,6 +49,20 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* Header */
+.kolf-header-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-bg);
+}
+/* Přihlášený admin má nahoře fixní WP lištu (32px / 46px pod 783px) — sticky
+   header se musí zastavit až pod ní, jinak jí zaleze pod okraj obrazovky. */
+@media screen and (min-width: 783px) {
+  body.admin-bar .kolf-header-bar { top: 32px; }
+}
+@media screen and (max-width: 782px) {
+  body.admin-bar .kolf-header-bar { top: 46px; }
+}
 .kolf-header {
   display: flex;
   align-items: center;
@@ -59,12 +73,17 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .kolf-logo {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  flex-direction: column;
+  gap: 4px;
   color: var(--color-text);
   text-decoration: none;
 }
 .kolf-logo:hover { text-decoration: none; }
+.kolf-logo__row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
 .kolf-logo__name {
   font-family: var(--font-serif);
   font-size: 23px;
@@ -76,6 +95,12 @@ img { max-width: 100%; height: auto; display: block; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-text-faint);
+}
+.kolf-logo__address {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
 }
 .kolf-nav {
   display: flex;
@@ -111,13 +136,6 @@ img { max-width: 100%; height: auto; display: block; }
   gap: 72px;
   align-items: start;
 }
-.kolf-hero__eyebrow {
-  margin: 0 0 22px;
-  font-size: 13px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
 .kolf-hero__title {
   margin: 0;
   font-family: var(--font-serif);
@@ -138,7 +156,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* Search */
 .kolf-search {
-  margin-top: 44px;
+  margin-bottom: 40px;
   max-width: 520px;
   position: relative;
 }
@@ -354,13 +372,49 @@ img { max-width: 100%; height: auto; display: block; }
 /* Footer */
 .kolf-footer {
   border-top: 1px solid var(--color-border);
-  padding: 26px 0 44px;
+  padding: 40px 0 44px;
+}
+.kolf-footer-nav__list {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 36px 56px;
+}
+.kolf-footer-nav__list > li { min-width: 160px; }
+.kolf-footer-nav__list > li > a {
+  font-weight: 600;
+  font-size: 14px;
+  color: #3d4550;
+}
+.kolf-footer-nav__list > li > a[href="#"] {
+  pointer-events: none;
+  cursor: default;
+}
+.kolf-footer-nav__list .sub-menu {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.kolf-footer-nav__list .sub-menu a {
+  font-size: 13px;
+  color: var(--color-text-faint);
+}
+.kolf-footer-nav__list .sub-menu a:hover,
+.kolf-footer-nav__list > li > a:hover { color: var(--color-accent); }
+.kolf-footer__meta {
   display: flex;
   justify-content: space-between;
   gap: 24px;
   font-size: 14px;
   color: var(--color-text-faint);
   flex-wrap: wrap;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
 }
 
 /* Directory (Oddělení / Osoby) */
@@ -429,5 +483,6 @@ img { max-width: 100%; height: auto; display: block; }
   .kolf-header { flex-wrap: wrap; padding: 18px 0; }
   .kolf-nav { width: 100%; order: 3; justify-content: flex-start; gap: 14px 20px; padding-top: 14px; }
   .kolf-hero__title { font-size: 32px; }
-  .kolf-footer { flex-direction: column; gap: 6px; }
+  .kolf-footer-nav__list { gap: 24px 32px; }
+  .kolf-footer__meta { flex-direction: column; gap: 6px; }
 }

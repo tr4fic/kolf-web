@@ -74,10 +74,12 @@ namigrované beze změny struktury — na to už WordPress svoje nástroje má:
   → obyčejné WP **Stránky** (Stránky → Všechny stránky), staré URL (`ShortUrlId`)
   zachované jako slug.
 - `MenuItem` → nativní WP **Menu** nazvané „CMS stránky (import)“ (Vzhled → Menu),
-  se stejnou hierarchií jako na starém webu. Je přiřazené k nové pozici
-  `legacy_pages`, ale šablona ho zatím nikde nevykresluje — kam (a jestli
-  vůbec) ho zobrazit nechávám na vás, klidně ho i přeorganizujte přetažením
-  přímo ve Vzhled → Menu.
+  se stejnou hierarchií jako na starém webu. Je přiřazené k pozici
+  `legacy_pages` a šablona ho vykresluje v patičce (`footer.php`) jako
+  dvouúrovňovou mapu stránek (`depth => 2` — hlubší úrovně, např. jednotlivé
+  „Pokyny“ pod Etickou komisí, se v patičce nezobrazují, ale zůstávají
+  dostupné jako běžné stránky). Přeorganizovat jde přetažením přímo ve
+  Vzhled → Menu.
 
 Produkční databáze (MSSQL) neměla u osoby přímý cizí klíč na oddělení —
 při migraci (`inc/data/persons.php`) se spároval podle shodného čísla dveří,

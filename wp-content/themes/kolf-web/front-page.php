@@ -19,15 +19,14 @@ $services      = kolf_get_services();
 
 <section class="kolf-hero">
 	<div>
-		<p class="kolf-hero__eyebrow"><?php echo esc_html( get_theme_mod( 'kolf_address', 'Masarykovo nám. 2667, Pardubice' ) ); ?></p>
-		<h1 class="kolf-hero__title"><?php esc_html_e( 'Více než čtyřicet ambulancí', 'kolf' ); ?><br><?php esc_html_e( 'pod jednou střechou.', 'kolf' ); ?></h1>
-		<p class="kolf-hero__lead"><?php esc_html_e( 'Najděte oddělení, lékaře nebo telefonní číslo za pár vteřin. Vše ostatní — lékárna, laboratoř, rentgen i optika — je ve stejné budově.', 'kolf' ); ?></p>
-
 		<div class="kolf-search">
 			<label for="kolf-search-input" class="kolf-search__label"><?php esc_html_e( 'Hledat oddělení nebo lékaře', 'kolf' ); ?></label>
 			<input type="text" id="kolf-search-input" class="kolf-search__input" placeholder="<?php esc_attr_e( 'např. ortopedie, Erben, rentgen', 'kolf' ); ?>" autocomplete="off">
 			<div id="kolf-search-results" class="kolf-search__results"></div>
 		</div>
+
+		<h1 class="kolf-hero__title"><?php esc_html_e( 'Více než čtyřicet ambulancí', 'kolf' ); ?><br><?php esc_html_e( 'pod jednou střechou.', 'kolf' ); ?></h1>
+		<p class="kolf-hero__lead"><?php esc_html_e( 'Najděte oddělení, lékaře nebo telefonní číslo za pár vteřin. Vše ostatní — lékárna, laboratoř, rentgen i optika — je ve stejné budově.', 'kolf' ); ?></p>
 	</div>
 
 	<aside class="kolf-quick">
