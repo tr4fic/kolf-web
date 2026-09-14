@@ -1,9 +1,15 @@
 <?php
 /**
  * Naplnění obsahu z reálné produkční databáze (MSSQL export Department/Person/Phone/
- * DayClock, viz inc/data/*.php) + marketingový obsah pro "Zdravotnické služby". Spouští
- * se jednou při aktivaci tématu — pokud obsah už existuje (poznáno podle kolf_legacy_id),
- * nic nepřepisuje. Vše je poté běžně editovatelné v adminu.
+ * DayClock/Page/ContentItem/MenuItem, viz inc/data/*.php) + marketingový obsah pro
+ * "Zdravotnické služby". Spouští se jednou při aktivaci tématu — pokud obsah už existuje
+ * (poznáno podle kolf_legacy_id), nic nepřepisuje. Vše je poté běžně editovatelné v adminu.
+ *
+ * Stránky (Page + ContentItem) se importují jako obyčejné WP stránky (post_type "page"),
+ * MenuItem jako nativní WP menu (Vzhled → Menu, "CMS stránky (import)") — žádný vlastní
+ * CPT navíc, protože tohle už WordPress umí sám. Menu se rovnou přiřadí k nové pozici
+ * "legacy_pages", ale nikde v šabloně se zatím nevykresluje — kam a jestli ho zobrazit
+ * je na vás (Vzhled → Menu).
  *
  * Osoba nemá v produkční databázi přímý cizí klíč na oddělení (tabulka Person žádný
  * DepartmentId nemá) — spárování proběhlo při přípravě dat v inc/data/persons.php
@@ -31,6 +37,14 @@ function kolf_seed_phones() {
 
 function kolf_seed_hours() {
 	return require KOLF_DIR . '/inc/data/hours.php';
+}
+
+function kolf_seed_pages() {
+	return require KOLF_DIR . '/inc/data/pages.php';
+}
+
+function kolf_seed_menu() {
+	return require KOLF_DIR . '/inc/data/menu.php';
 }
 
 function kolf_seed_services() {
@@ -273,6 +287,129 @@ function kolf_seed_run_hours( $department_map, $person_map ) {
 	}
 }
 
+/**
+ * Obyčejné WordPress stránky (post_type "page") z Page.sql + ContentItem.sql.
+ * @return array legacy_id (z Page.sql) => nové WP post ID
+ */
+function kolf_seed_run_pages() {
+	$map = array();
+
+	foreach ( kolf_seed_pages() as $page ) {
+		$existing = get_posts( array(
+			'post_type'      => 'page',
+			'posts_per_page' => 1,
+			'meta_key'       => 'kolf_legacy_id',
+			'meta_value'     => $page['legacy_id'],
+		) );
+		if ( $existing ) {
+			$map[ $page['legacy_id'] ] = $existing[0]->ID;
+			continue;
+		}
+
+		$post_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => $page['title'],
+			'post_name'    => $page['slug'],
+			'post_content' => $page['content'] ? $page['content'] : '',
+			'post_status'  => 'publish',
+		) );
+		if ( is_wp_error( $post_id ) || ! $post_id ) {
+			continue;
+		}
+
+		update_post_meta( $post_id, 'kolf_legacy_id', $page['legacy_id'] );
+		$map[ $page['legacy_id'] ] = $post_id;
+	}
+
+	return $map;
+}
+
+/**
+ * Postaví nativní WP menu (Vzhled → Menu) ze stromu MenuItem.sql. Technický kořen
+ * "MenuTop" se do dat vůbec nedostal (viz inc/data/menu.php) — jeho přímé děti tak
+ * tvoří nejvyšší úroveň menu. "Organizační" položky (bez odkazu na stránku, jen
+ * nadpis pro podnabídku) se vytvoří jako vlastní odkaz na "#".
+ */
+function kolf_seed_run_menu( $page_map ) {
+	$menu_name = __( 'CMS stránky (import)', 'kolf' );
+	$menu      = wp_get_nav_menu_object( $menu_name );
+	$menu_id   = $menu ? $menu->term_id : wp_create_nav_menu( $menu_name );
+	if ( is_wp_error( $menu_id ) || ! $menu_id ) {
+		return;
+	}
+
+	$items     = kolf_seed_menu();
+	$id_map    = array(); // legacy MenuItem.Id => nové ID nav_menu_item postu
+	$remaining = $items;
+	$safety    = 0;
+
+	// Položky se musí vytvářet v pořadí rodič → dítě, ale v datech nejsou takhle
+	// seřazené — v několika průchodech zpracujeme vždy jen ty, jejichž rodič už
+	// existuje (nebo je top-level), dokud nezbyde nic.
+	while ( $remaining && $safety < 10 ) {
+		$safety++;
+		$next_remaining = array();
+
+		foreach ( $remaining as $item ) {
+			$parent_ready = ( null === $item['parent_legacy_id'] ) || isset( $id_map[ $item['parent_legacy_id'] ] );
+			if ( ! $parent_ready ) {
+				$next_remaining[] = $item;
+				continue;
+			}
+
+			$existing = get_posts( array(
+				'post_type'      => 'nav_menu_item',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'meta_key'       => 'kolf_legacy_id',
+				'meta_value'     => $item['legacy_id'],
+			) );
+			if ( $existing ) {
+				$id_map[ $item['legacy_id'] ] = $existing[0]->ID;
+				continue;
+			}
+
+			$parent_wp_id = $item['parent_legacy_id'] ? ( $id_map[ $item['parent_legacy_id'] ] ?? 0 ) : 0;
+
+			$args = array(
+				'menu-item-title'     => $item['title'],
+				'menu-item-parent-id' => $parent_wp_id,
+				'menu-item-position'  => $item['order'],
+				'menu-item-status'    => 'publish',
+			);
+
+			if ( $item['is_folder'] || ! $item['page_legacy_id'] || ! isset( $page_map[ $item['page_legacy_id'] ] ) ) {
+				$args['menu-item-type'] = 'custom';
+				$args['menu-item-url']  = '#';
+			} else {
+				$args['menu-item-type']      = 'post_type';
+				$args['menu-item-object']    = 'page';
+				$args['menu-item-object-id'] = $page_map[ $item['page_legacy_id'] ];
+			}
+
+			$item_id = wp_update_nav_menu_item( $menu_id, 0, $args );
+			if ( is_wp_error( $item_id ) || ! $item_id ) {
+				continue;
+			}
+			update_post_meta( $item_id, 'kolf_legacy_id', $item['legacy_id'] );
+			$id_map[ $item['legacy_id'] ] = $item_id;
+		}
+
+		if ( count( $next_remaining ) === count( $remaining ) ) {
+			break; // žádný posun — v čistých datech by se sem nemělo dojít
+		}
+		$remaining = $next_remaining;
+	}
+
+	// Ať je menu rovnou přiřazené k pozici a jde ho najít ve Vzhled → Menu,
+	// aniž by ho bylo nutné nejdřív ručně přiřadit.
+	$locations = get_theme_mod( 'nav_menu_locations', array() );
+	if ( empty( $locations['legacy_pages'] ) ) {
+		$locations['legacy_pages'] = $menu_id;
+		set_theme_mod( 'nav_menu_locations', $locations );
+	}
+}
+
 function kolf_seed_run_services() {
 	$order = 0;
 	foreach ( kolf_seed_services() as $service ) {
@@ -300,7 +437,7 @@ function kolf_seed_run_services() {
 }
 
 function kolf_run_seed() {
-	if ( get_option( 'kolf_seeded_v3' ) ) {
+	if ( get_option( 'kolf_seeded_v4' ) ) {
 		return;
 	}
 
@@ -312,7 +449,10 @@ function kolf_run_seed() {
 	kolf_seed_run_hours( $department_map, $person_map );
 	kolf_seed_run_services();
 
-	update_option( 'kolf_seeded_v3', 1 );
+	$page_map = kolf_seed_run_pages();
+	kolf_seed_run_menu( $page_map );
+
+	update_option( 'kolf_seeded_v4', 1 );
 	flush_rewrite_rules();
 }
 add_action( 'after_switch_theme', 'kolf_run_seed' );
@@ -333,7 +473,7 @@ add_action( 'after_switch_theme', 'kolf_flush_rewrites_on_activation' );
  */
 function kolf_maybe_reseed() {
 	if ( isset( $_GET['kolf_reseed'] ) && current_user_can( 'manage_options' ) ) {
-		delete_option( 'kolf_seeded_v3' );
+		delete_option( 'kolf_seeded_v4' );
 		kolf_run_seed();
 		wp_safe_redirect( remove_query_arg( 'kolf_reseed' ) );
 		exit;

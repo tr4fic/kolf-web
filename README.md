@@ -68,6 +68,17 @@ se přímo ve formuláři konkrétního oddělení nebo osoby (tlačítka „+ P
 Produkční databáze (MSSQL `DayClock`) měla hodiny jen u osob — u oddělení
 jde nově přidat hodiny ručně v adminu, migrovaná data tam nejsou.
 
+**CMS stránky** (staré MSSQL tabulky `Page` + `ContentItem` + `MenuItem`) jsou
+namigrované beze změny struktury — na to už WordPress svoje nástroje má:
+- `Page` + `ContentItem` (spárováno přes `ContentItem.Key = 'CmsPage' + Page.Id`)
+  → obyčejné WP **Stránky** (Stránky → Všechny stránky), staré URL (`ShortUrlId`)
+  zachované jako slug.
+- `MenuItem` → nativní WP **Menu** nazvané „CMS stránky (import)“ (Vzhled → Menu),
+  se stejnou hierarchií jako na starém webu. Je přiřazené k nové pozici
+  `legacy_pages`, ale šablona ho zatím nikde nevykresluje — kam (a jestli
+  vůbec) ho zobrazit nechávám na vás, klidně ho i přeorganizujte přetažením
+  přímo ve Vzhled → Menu.
+
 Produkční databáze (MSSQL) neměla u osoby přímý cizí klíč na oddělení —
 při migraci (`inc/data/persons.php`) se spároval podle shodného čísla dveří,
 u pár desítek případů, kde se čísla neshodovala přesně, ručně podle patra a
@@ -95,7 +106,7 @@ uživatel/heslo `admin` / `password`). Konfigurace je v `.wp-env.json`.
    `wp-content/themes/` vaší instalace.
 3. V adminu aktivujte téma **Poliklinika KOLF** — při aktivaci se
    automaticky naplní obsah reálnými daty z produkce (47 oddělení, 63 osob,
-   telefony, ordinační hodiny, 5 zdravotnických služeb).
+   telefony, ordinační hodiny, 5 zdravotnických služeb, 24 CMS stránek a menu).
 4. V **Nastavení → Čtení** nemusíte nic měnit, úvodní stránka se řídí
    šablonou `front-page.php` automaticky.
 
