@@ -7,7 +7,7 @@ get_header();
 
 <section class="kolf-directory">
 	<div class="kolf-section-head">
-		<h2><?php esc_html_e( 'Osoby', 'kolf' ); ?></h2>
+		<h1><?php esc_html_e( 'Osoby', 'kolf' ); ?></h1>
 	</div>
 
 	<div class="kolf-directory__tabs">

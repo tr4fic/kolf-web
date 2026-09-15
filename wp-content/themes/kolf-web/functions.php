@@ -16,6 +16,7 @@ require KOLF_DIR . '/inc/customizer.php';
 require KOLF_DIR . '/inc/seed-content.php';
 require KOLF_DIR . '/inc/helpers.php';
 require KOLF_DIR . '/inc/performance.php';
+require KOLF_DIR . '/inc/seo.php';
 
 /**
  * Theme setup.
