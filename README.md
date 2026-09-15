@@ -9,9 +9,9 @@ Web běží na **jednom vlastním tématu** (`wp-content/themes/kolf-web`) bez p
 builderu a bez SEO/formulářových pluginů:
 
 - Layout a texty jsou přímo v PHP šablonách (žádný Elementor/Divi).
-- Oddělení (`oddeleni`), Osoby (`osoba`), Telefony (`telefon`, jen na pozadí),
-  Hodiny (`hodiny`, jen na pozadí) a Zdravotnické služby (`sluzba`) jsou
-  vlastní custom post types s jednoduchými meta boxy — editace v adminu bez ACF.
+- Oddělení (`oddeleni`), Osoby (`osoba`), Telefony (`telefon`) a Hodiny
+  (`hodiny`, jen na pozadí) jsou vlastní custom post types s jednoduchými meta
+  boxy — editace v adminu bez ACF.
 - Živé vyhledávání v oddělení je čistý JS (žádné jQuery, žádná knihovna).
 - Jediný externí request navíc je na Google Fonts (Source Serif 4, IBM Plex
   Sans, IBM Plex Mono) — dá se v budoucnu i self-hostovat pro ještě rychlejší
@@ -37,7 +37,7 @@ wp-content/themes/kolf-web/
 ├── single-osoba.php         # detail jedné osoby (+ oddělení a telefony)
 ├── page.php / index.php     # obecné stránky / fallback
 ├── inc/
-│   ├── post-types.php       # CPT "oddeleni", "osoba", "telefon", "hodiny", "sluzba"
+│   ├── post-types.php       # CPT "oddeleni", "osoba", "telefon", "hodiny"
 │   ├── meta-boxes.php       # vlastní meta boxy + opakovatelné seznamy telefonů/hodin
 │   ├── customizer.php       # editovatelné kontaktní údaje (telefon, e-mail, adresa)
 │   ├── helpers.php          # dotazy nad CPT (patra, telefony, hodiny, osoby podle oddělení…)
@@ -62,11 +62,37 @@ oddeleni (1) ──── (N) hodiny    — rozvrh (ordinační/provozní hodiny
 osoba    (1) ──── (N) hodiny    — rozvrh patřící osobě
 ```
 
-`telefon` a `hodiny` nemají vlastní stránku ani položku v menu adminu — zadávají
-se přímo ve formuláři konkrétního oddělení nebo osoby (tlačítka „+ Přidat
-číslo“ / „+ Přidat rozvrh“), v databázi ale žijí jako samostatné záznamy.
-Produkční databáze (MSSQL `DayClock`) měla hodiny jen u osob — u oddělení
-jde nově přidat hodiny ručně v adminu, migrovaná data tam nejsou.
+Telefonní čísla a hodiny se zadávají přímo ve formuláři konkrétního oddělení
+nebo osoby (tlačítka „+ Přidat číslo“ / „+ Přidat rozvrh“), v databázi ale
+žijí jako samostatné záznamy (`telefon` / `hodiny`). `hodiny` nemá vlastní
+stránku v menu adminu vůbec. `telefon` svou stránku „Telefony“ má — ne pro
+přidávání čísel (to zůstává přes repeater u oddělení/osoby), ale pro přehled
+a zaškrtnutí „Zvýraznit“ (viz níže); samotné číslo jde v „Telefony“ upravit
+přes pole „Název“. Produkční databáze (MSSQL `DayClock`) měla hodiny jen
+u osob — u oddělení jde nově přidat hodiny ručně v adminu, migrovaná data
+tam nejsou.
+
+**Zdravotnické služby** (sekce na úvodní stránce) a **Rychlá čísla** (box
+tamtéž) nemají vlastní CPT — obojí funguje stejným principem, jen na jiné
+úrovni dat:
+- **Zdravotnické služby** vypisují oddělení zaškrtnutá jako **„Zvýraznit“**
+  (checkbox v adminu u oddělení), s umístěním a telefonem vypsanými přímo
+  z dat oddělení. Text popisu se doplní pod stávající obsah oddělení. Seed
+  zaškrtne a doplní popis u pěti oddělení, která odpovídají bývalým
+  marketingovým „službám“ (Lékárna, Laboratoř/MeDiLa, Rentgen, Zdravotnické
+  potřeby, Oční optika) — viz `kolf_department_highlight_overrides()`
+  v `inc/seed-content.php`.
+- **Rychlá čísla** vypisují konkrétní telefonní čísla zaškrtnutá jako
+  „Zvýraznit“ (checkbox v sekci Telefony) — ne celé oddělení, protože
+  oddělení jich může mít víc a jde vybrat přesně to jedno. Pořadí a
+  volitelný vlastní popisek (jinak název přiřazeného oddělení/osoby) se
+  nastavují tamtéž. Seed zaškrtne 3 čísla (Lékárna, Rentgen, Zdravotnické
+  potřeby) — viz `kolf_phone_highlight_overrides()`. „Ústředna“ na začátku
+  boxu je samostatná položka z **Přizpůsobit → Kontaktní údaje**, žádný
+  telefon.
+
+Zaškrtnout/odškrtnout jde u libovolného dalšího oddělení/telefonu kdykoliv
+ručně.
 
 **CMS stránky** (staré MSSQL tabulky `Page` + `ContentItem` + `MenuItem`) jsou
 namigrované beze změny struktury — na to už WordPress svoje nástroje má:
@@ -107,8 +133,9 @@ uživatel/heslo `admin` / `password`). Konfigurace je v `.wp-env.json`.
 2. Zkopírujte/nalinkujte `wp-content/themes/kolf-web` do
    `wp-content/themes/` vaší instalace.
 3. V adminu aktivujte téma **Poliklinika KOLF** — při aktivaci se
-   automaticky naplní obsah reálnými daty z produkce (47 oddělení, 63 osob,
-   telefony, ordinační hodiny, 5 zdravotnických služeb, 24 CMS stránek a menu).
+   automaticky naplní obsah reálnými daty z produkce (47 oddělení — z toho
+   5 zvýrazněných v sekci Zdravotnické služby, 63 osob, telefony, ordinační
+   hodiny, 24 CMS stránek a menu).
 4. V **Nastavení → Čtení** nemusíte nic měnit, úvodní stránka se řídí
    šablonou `front-page.php` automaticky.
 

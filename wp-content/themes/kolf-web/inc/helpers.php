@@ -64,9 +64,9 @@ function kolf_get_phones_by_parent( $meta_key, $parent_id ) {
 }
 
 /**
- * Všechna oddělení + osoby jako jeden index pro živé vyhledávání na úvodní stránce.
+ * Index oddělení pro živé vyhledávání (úvodní stránka + /oddeleni/).
  */
-function kolf_get_search_index() {
+function kolf_get_department_search_index() {
 	$out = array();
 
 	$departments = get_posts( array( 'post_type' => 'oddeleni', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC' ) );
@@ -77,6 +77,15 @@ function kolf_get_search_index() {
 			'url'  => get_permalink( $dept ),
 		);
 	}
+
+	return $out;
+}
+
+/**
+ * Index osob pro živé vyhledávání (úvodní stránka + /osoby/).
+ */
+function kolf_get_person_search_index() {
+	$out = array();
 
 	$persons = get_posts( array( 'post_type' => 'osoba', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC' ) );
 	foreach ( $persons as $person ) {
@@ -93,39 +102,53 @@ function kolf_get_search_index() {
 }
 
 /**
- * Oddělení označená pro box "Rychlá čísla" na úvodní stránce, seřazená podle kolf_quick_order.
- * Číslo bere první telefon patřící danému oddělení.
+ * Oddělení + osoby jako jeden index pro živé vyhledávání na úvodní stránce.
+ */
+function kolf_get_search_index() {
+	return array_merge( kolf_get_department_search_index(), kolf_get_person_search_index() );
+}
+
+/**
+ * Telefonní čísla zaškrtnutá jako "Zvýraznit" (kolf_highlight) pro box
+ * "Rychlá čísla" na úvodní stránce, seřazená podle kolf_quick_order.
  */
 function kolf_get_quick_numbers() {
 	$posts = get_posts( array(
-		'post_type'      => 'oddeleni',
+		'post_type'      => 'telefon',
 		'posts_per_page' => -1,
-		'meta_key'       => 'kolf_quick_order',
-		'orderby'        => 'meta_value_num',
-		'order'          => 'ASC',
-		'meta_query'     => array(
-			array(
-				'key'     => 'kolf_quick_order',
-				'value'   => 0,
-				'compare' => '>',
-				'type'    => 'NUMERIC',
-			),
-		),
+		'meta_key'       => 'kolf_highlight',
+		'meta_value'     => 1,
 	) );
+
+	usort( $posts, function ( $a, $b ) {
+		return (int) get_post_meta( $a->ID, 'kolf_quick_order', true ) <=> (int) get_post_meta( $b->ID, 'kolf_quick_order', true );
+	} );
 
 	$out = array();
 	foreach ( $posts as $post ) {
-		$phones = kolf_get_department_phones( $post->ID );
-		if ( empty( $phones ) ) {
-			continue;
-		}
 		$label = get_post_meta( $post->ID, 'kolf_quick_label', true );
 		$out[] = array(
-			'label'  => $label ? $label : $post->post_title,
-			'number' => $phones[0],
+			'label'  => $label ? $label : kolf_quick_phone_owner_label( $post->ID ),
+			'number' => kolf_format_phone( get_post_meta( $post->ID, 'kolf_phone_number', true ) ),
 		);
 	}
 	return $out;
+}
+
+/**
+ * Oddělení/osoba, ke které telefon patří — výchozí popisek v "Rychlá čísla",
+ * použije se, pokud se nevyplní vlastní kolf_quick_label.
+ */
+function kolf_quick_phone_owner_label( $phone_id ) {
+	$dept_id = (int) get_post_meta( $phone_id, 'kolf_phone_department_id', true );
+	if ( $dept_id ) {
+		return get_the_title( $dept_id );
+	}
+	$person_id = (int) get_post_meta( $phone_id, 'kolf_phone_person_id', true );
+	if ( $person_id ) {
+		return kolf_person_display_name( $person_id );
+	}
+	return '';
 }
 
 /**
@@ -194,14 +217,17 @@ function kolf_get_persons_grouped_alpha() {
 }
 
 /**
- * Zdravotnické služby (Lékárna, Laboratoř, …) v pořadí nastaveném v adminu (page-attributes menu_order).
+ * Oddělení zaškrtnutá jako "Zvýraznit" (kolf_highlight) — zobrazují se v sekci
+ * "Zdravotnické služby" na úvodní stránce.
  */
-function kolf_get_services() {
+function kolf_get_highlighted_departments() {
 	return get_posts( array(
-		'post_type'      => 'sluzba',
+		'post_type'      => 'oddeleni',
 		'posts_per_page' => -1,
-		'orderby'        => 'menu_order',
+		'orderby'        => 'title',
 		'order'          => 'ASC',
+		'meta_key'       => 'kolf_highlight',
+		'meta_value'     => 1,
 	) );
 }
 

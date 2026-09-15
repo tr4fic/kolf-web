@@ -1,6 +1,8 @@
 /**
- * Živé vyhledávání v oddělení / lékařích na úvodní stránce.
- * Čistý JS, žádná knihovna. Data (kolfDepartments) jsou předána přes wp_localize_script.
+ * Živé vyhledávání — úvodní stránka (oddělení + osoby), /oddeleni/ (jen
+ * oddělení) a /osoby/ (jen osoby); která data se použijí, řeší kolf_assets()
+ * ve functions.php. Čistý JS, žádná knihovna. Data (kolfDepartments) jsou
+ * předána přes wp_localize_script.
  */
 ( function () {
 	'use strict';

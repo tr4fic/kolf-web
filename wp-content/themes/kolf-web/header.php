@@ -36,4 +36,19 @@
 	</div>
 </header>
 
+<script>
+( function () {
+	var header = document.querySelector( '.kolf-header-bar' );
+	if ( ! header ) {
+		return;
+	}
+	function setHeaderOffset() {
+		document.documentElement.style.setProperty( '--kolf-header-h', header.getBoundingClientRect().bottom + 'px' );
+	}
+	setHeaderOffset();
+	window.addEventListener( 'load', setHeaderOffset );
+	window.addEventListener( 'resize', setHeaderOffset );
+}() );
+</script>
+
 <div class="kolf-container">

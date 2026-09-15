@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom post types: Oddělení, Osoby, Telefony, Hodiny (+ Zdravotnické služby pro marketingový obsah).
+ * Custom post types: Oddělení, Osoby, Telefony, Hodiny.
  *
  * Datový model odpovídá reálné produkční struktuře (MSSQL Department / Person / Phone / DayClock):
  *   oddeleni (1) ---- (N) osoba        — osoba patří max. do jednoho oddělení (kolf_department_id)
@@ -54,15 +54,23 @@ function kolf_register_post_types() {
 		'show_in_rest' => true,
 	) );
 
+	// Bez veřejné stránky (žádné URL pro jedno číslo), ale s vlastní sekcí
+	// v adminu — čísla se sice normálně zadávají přes opakovatelný seznam
+	// u oddělení/osoby, "Telefony" slouží k přehledu a k zaškrtnutí "Zvýraznit".
 	register_post_type( 'telefon', array(
 		'labels' => array(
 			'name'          => __( 'Telefony', 'kolf' ),
 			'singular_name' => __( 'Telefon', 'kolf' ),
+			'edit_item'     => __( 'Upravit telefon', 'kolf' ),
+			'search_items'  => __( 'Hledat telefon', 'kolf' ),
+			'all_items'     => __( 'Telefony', 'kolf' ),
+			'not_found'     => __( 'Žádné telefony nenalezeny', 'kolf' ),
 		),
 		'public'             => false,
 		'publicly_queryable' => false,
-		'show_ui'            => false,
-		'show_in_menu'       => false,
+		'show_ui'            => true,
+		'show_in_menu'       => true,
+		'menu_icon'          => 'dashicons-phone',
 		'has_archive'        => false,
 		'rewrite'            => false,
 		'supports'           => array( 'title' ),
@@ -85,22 +93,6 @@ function kolf_register_post_types() {
 		'rewrite'            => false,
 		'supports'           => array( 'title' ),
 		'show_in_rest'       => false,
-	) );
-
-	register_post_type( 'sluzba', array(
-		'labels' => array(
-			'name'          => __( 'Zdravotnické služby', 'kolf' ),
-			'singular_name' => __( 'Zdravotnická služba', 'kolf' ),
-			'add_new_item'  => __( 'Přidat službu', 'kolf' ),
-			'edit_item'     => __( 'Upravit službu', 'kolf' ),
-			'all_items'     => __( 'Zdravotnické služby', 'kolf' ),
-		),
-		'public'       => true,
-		'has_archive'  => false,
-		'rewrite'      => array( 'slug' => 'sluzby' ),
-		'menu_icon'    => 'dashicons-plus-alt',
-		'supports'     => array( 'title', 'editor', 'page-attributes' ),
-		'show_in_rest' => true,
 	) );
 }
 add_action( 'init', 'kolf_register_post_types' );
@@ -128,4 +120,16 @@ function kolf_floor_number_display( $floor ) {
 	}
 	$floor = (int) $floor;
 	return $floor < 0 ? '−1' : (string) $floor;
+}
+
+/**
+ * HTML id skupiny patra na /oddeleni/ — používá se jako kotva (#patro-1) při
+ * odkazování z karet pater na front-page.
+ */
+function kolf_floor_anchor_id( $floor ) {
+	if ( '' === $floor || null === $floor || 'none' === $floor ) {
+		return 'patro-neuvedeno';
+	}
+	$floor = (int) $floor;
+	return $floor < 0 ? 'suteren' : 'patro-' . $floor;
 }

@@ -20,7 +20,10 @@
 
 * { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: var( --kolf-header-h, 110px );
+}
 
 body {
   margin: 0;
@@ -113,6 +116,13 @@ img { max-width: 100%; height: auto; display: block; }
   color: #3d4550;
 }
 .kolf-nav a:hover { color: var(--color-accent); }
+.kolf-nav a.is-active,
+.kolf-nav .is-active > a,
+.kolf-nav .current-menu-item > a,
+.kolf-nav .current_page_item > a {
+  color: var(--color-accent);
+  font-weight: 600;
+}
 .kolf-nav__phone {
   display: inline-flex;
   align-items: center;
@@ -130,7 +140,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* Hero */
 .kolf-hero {
-  padding: 96px 0 72px;
+  padding: 50px 0;
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 72px;
@@ -265,7 +275,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* Floors ("Kde co najdete") */
-.kolf-floors { padding: 16px 0 84px; }
+.kolf-floors { padding: 16px 0 50px; }
 .kolf-floors__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -308,7 +318,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 /* Services */
-.kolf-services { padding: 0 0 96px; }
+.kolf-services { padding: 0 0 50px; }
 .kolf-service {
   display: grid;
   grid-template-columns: 0.9fr 1.6fr;
@@ -324,7 +334,6 @@ img { max-width: 100%; height: auto; display: block; }
   font-weight: 600;
   letter-spacing: -0.015em;
 }
-.kolf-service__subtitle { margin: 0; font-size: 15px; color: var(--color-text-faint); }
 .kolf-service__body { margin: 0; font-size: 17px; line-height: 1.7; color: #3d4550; text-wrap: pretty; }
 .kolf-service__meta { margin: 16px 0 0; font-family: var(--font-mono); font-size: 13px; color: var(--color-text-faint); }
 
@@ -333,7 +342,7 @@ img { max-width: 100%; height: auto; display: block; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 64px;
-  padding: 64px 0 90px;
+  padding: 50px 0;
 }
 .kolf-contact h2 {
   margin: 0 0 26px;
@@ -419,7 +428,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* Directory (Oddělení / Osoby) */
 .kolf-directory { padding: 56px 0 96px; }
-.kolf-directory__tabs { display: flex; gap: 10px; margin: 28px 0 8px; }
+.kolf-directory__tabs { display: flex; gap: 10px; margin: 28px 0; }
 .kolf-directory__tab {
   padding: 10px 18px;
   border-radius: 999px;
@@ -451,6 +460,12 @@ img { max-width: 100%; height: auto; display: block; }
 .kolf-directory__row:hover { text-decoration: none; }
 .kolf-directory__row-name { font-size: 16px; }
 .kolf-directory__row-meta { font-family: var(--font-mono); font-size: 13px; color: var(--color-text-faint); white-space: nowrap; }
+.kolf-directory__empty { padding: 16px 0; font-size: 15px; color: var(--color-text-faint); }
+/* `.kolf-directory__row` má vlastní `display: flex` — bez tohohle by ho
+   přebilo nad výchozím `[hidden] { display: none }` prohlížeče a filtr
+   (directory-filter.js) by řádek skrytý přes `hidden` dál zobrazoval. */
+.kolf-directory__row[hidden],
+.kolf-directory__group[hidden] { display: none; }
 
 /* Single oddělení */
 .kolf-single { padding: 64px 0 96px; max-width: 720px; }
@@ -471,11 +486,11 @@ img { max-width: 100%; height: auto; display: block; }
 /* Responsive */
 @media (max-width: 900px) {
   :root { --container-pad: 24px; }
-  .kolf-hero { grid-template-columns: 1fr; gap: 40px; padding: 48px 0 40px; }
+  .kolf-hero { grid-template-columns: 1fr; gap: 40px; padding: 40px 0; }
   .kolf-hero__title { font-size: 42px; }
   .kolf-floors__grid { grid-template-columns: 1fr; }
   .kolf-service { grid-template-columns: 1fr; gap: 12px; }
-  .kolf-contact { grid-template-columns: 1fr; gap: 40px; padding: 40px 0 56px; }
+  .kolf-contact { grid-template-columns: 1fr; gap: 40px; padding: 40px 0 50px; }
   .kolf-nav { gap: 18px; }
 }
 

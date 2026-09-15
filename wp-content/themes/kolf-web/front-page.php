@@ -14,7 +14,7 @@ $floors_meta = array(
 );
 $floor_groups  = kolf_get_departments_grouped_by_floor();
 $quick_numbers = kolf_get_quick_numbers();
-$services      = kolf_get_services();
+$services      = kolf_get_highlighted_departments();
 ?>
 
 <section class="kolf-hero">
@@ -57,7 +57,7 @@ $services      = kolf_get_services();
 			$names       = wp_list_pluck( $posts, 'post_title' );
 			$floor_value = 'none' === $floor ? null : $floor;
 			?>
-			<a href="<?php echo esc_url( home_url( '/oddeleni/' ) ); ?>" class="kolf-floor-card">
+			<a href="<?php echo esc_url( home_url( '/oddeleni/#' . kolf_floor_anchor_id( $floor ) ) ); ?>" class="kolf-floor-card">
 				<div class="kolf-floor-card__head">
 					<span class="kolf-floor-card__num"><?php echo esc_html( kolf_floor_number_display( $floor_value ) ); ?></span>
 					<span class="kolf-floor-card__caption"><?php echo esc_html( $floors_meta[ $floor ] ?? kolf_floor_label( $floor_value ) ); ?></span>
@@ -72,15 +72,19 @@ $services      = kolf_get_services();
 	<div class="kolf-section-head">
 		<h2><?php esc_html_e( 'Zdravotnické služby', 'kolf' ); ?></h2>
 	</div>
-	<?php foreach ( $services as $service ) : ?>
+	<?php foreach ( $services as $service ) :
+		$service_meta = array_filter( array(
+			kolf_floor_label( get_post_meta( $service->ID, 'kolf_floor', true ) ),
+			implode( ', ', kolf_get_department_phones( $service->ID ) ),
+		) );
+		?>
 		<article class="kolf-service">
 			<div>
 				<h3 class="kolf-service__title"><?php echo esc_html( $service->post_title ); ?></h3>
-				<p class="kolf-service__subtitle"><?php echo esc_html( get_post_meta( $service->ID, 'kolf_subtitle', true ) ); ?></p>
 			</div>
 			<div>
 				<p class="kolf-service__body"><?php echo esc_html( $service->post_content ); ?></p>
-				<p class="kolf-service__meta"><?php echo esc_html( get_post_meta( $service->ID, 'kolf_meta', true ) ); ?></p>
+				<p class="kolf-service__meta"><?php echo esc_html( implode( ' · ', $service_meta ) ); ?></p>
 			</div>
 		</article>
 	<?php endforeach; ?>

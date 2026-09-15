@@ -1,15 +1,21 @@
 <?php
 /**
  * Naplnění obsahu z reálné produkční databáze (MSSQL export Department/Person/Phone/
- * DayClock/Page/ContentItem/MenuItem, viz inc/data/*.php) + marketingový obsah pro
- * "Zdravotnické služby". Spouští se jednou při aktivaci tématu — pokud obsah už existuje
- * (poznáno podle kolf_legacy_id), nic nepřepisuje. Vše je poté běžně editovatelné v adminu.
+ * DayClock/Page/ContentItem/MenuItem, viz inc/data/*.php). Spouští se jednou při aktivaci
+ * tématu — pokud obsah už existuje (poznáno podle kolf_legacy_id), nic nepřepisuje. Vše je
+ * poté běžně editovatelné v adminu.
+ *
+ * Sekce "Zdravotnické služby" na úvodní stránce nemá vlastní CPT — vypisuje oddělení
+ * zaškrtnutá jako "Zvýraznit" (kolf_highlight), viz kolf_department_highlight_overrides()
+ * a kolf_seed_apply_highlight() níže. Stejný princip (jiné meta klíče, žádný text popisu
+ * navíc) používá box "Rychlá čísla" — tam se "Zvýraznit" zaškrtává u konkrétního telefonu
+ * (CPT "telefon", sekce Telefony v adminu), viz kolf_phone_highlight_overrides()
+ * a kolf_seed_apply_phone_highlight().
  *
  * Stránky (Page + ContentItem) se importují jako obyčejné WP stránky (post_type "page"),
  * MenuItem jako nativní WP menu (Vzhled → Menu, "CMS stránky (import)") — žádný vlastní
- * CPT navíc, protože tohle už WordPress umí sám. Menu se rovnou přiřadí k nové pozici
- * "legacy_pages", ale nikde v šabloně se zatím nevykresluje — kam a jestli ho zobrazit
- * je na vás (Vzhled → Menu).
+ * CPT navíc, protože tohle už WordPress umí sám. Menu je přiřazené k pozici "legacy_pages"
+ * a šablona ho vykresluje v patičce (footer.php).
  *
  * Osoba nemá v produkční databázi přímý cizí klíč na oddělení (tabulka Person žádný
  * DepartmentId nemá) — spárování proběhlo při přípravě dat v inc/data/persons.php
@@ -47,29 +53,20 @@ function kolf_seed_menu() {
 	return require KOLF_DIR . '/inc/data/menu.php';
 }
 
-function kolf_seed_services() {
-	// [ název, podtitul, meta řádek, popis ]
+/**
+ * legacy_id (Department.Id) => marketingový popis pro sekci "Zdravotnické služby"
+ * na úvodní stránce. Dřív šlo o samostatný CPT "sluzba" s ručně vyplněným
+ * názvem/podtitulem/umístěním/telefonem — ty teď bere šablona přímo z oddělení
+ * (viz front-page.php), tady zbývá jen text popisu navíc a příznak "Zvýraznit"
+ * (kolf_highlight), který se při seedu nastaví na dotčených odděleních.
+ */
+function kolf_department_highlight_overrides() {
 	return array(
-		array(
-			'Lékárna', 'Lékárna na poliklinice', 'Přízemí · 466 753 332',
-			'Naše lékárna zajišťuje kompletní zásobování léky, infuzními roztoky, částečně zdravotnickým materiálem a dezinfekčními prostředky. Veřejná část lékárny slouží individuálním pacientům a zákazníkům - odborný personál zajišťuje expedici volně prodejných léků a léků vázaných na recept. Lékárna též nabízí velký rozsah potravinových doplňků, čajů, vitamínů, dětské výživy i kosmetiky pro alergiky.',
-		),
-		array(
-			'Laboratoř', 'Odběry krve', '2. patro · MeDiLa spol. s r.o. · www.medila.cz',
-			'Oddělení laboratoře provozuje MeDiLa spol. s.r.o. www.medila.cz a zajišťuje odběry krve a příjem biologického materiálu.',
-		),
-		array(
-			'Rentgen', 'Radiologické oddělení', '1. patro · 466 753 264, 466 753 265',
-			'Diagnostické obrazy získáváme pomocí ionizujícího záření - skiagrafie. Oddělení je vybaveno rovněž moderním RTG přístrojem s přímou digitalizací. Přístroje na RTG oddělení jsou pravidelně kontrolovány a proměřovány, a tudíž odpovídají evropským normám týkajících se zátěže záření pro populaci.',
-		),
-		array(
-			'Zdravotnické potřeby', 'Zdravotnický materiál', 'Přízemí · 466 753 272',
-			'Oddělení zdravotnických prostředků zajišťuje výdej prostředků zdravotnické techniky na poukazy tj. poukazy na léčebnou a ortopedickou pomůcku. Zároveň nabízí volně dostupný zdravotnický materiál za hotové.',
-		),
-		array(
-			'Oční optika', 'Vyšetření, dioptrické i sluneční brýle', 'Přízemí · 466 753 240',
-			'Zajišťujeme vyšetření zraku lékařem bez čekání, kompletní péči o Váš zrak, včetně odborných vyšetření a aplikaci kontaktních čoček.',
-		),
+		35 => 'Naše lékárna zajišťuje kompletní zásobování léky, infuzními roztoky, částečně zdravotnickým materiálem a dezinfekčními prostředky. Veřejná část lékárny slouží individuálním pacientům a zákazníkům - odborný personál zajišťuje expedici volně prodejných léků a léků vázaných na recept. Lékárna též nabízí velký rozsah potravinových doplňků, čajů, vitamínů, dětské výživy i kosmetiky pro alergiky.',
+		20 => 'Oddělení laboratoře provozuje MeDiLa spol. s.r.o. www.medila.cz a zajišťuje odběry krve a příjem biologického materiálu.',
+		28 => 'Diagnostické obrazy získáváme pomocí ionizujícího záření - skiagrafie. Oddělení je vybaveno rovněž moderním RTG přístrojem s přímou digitalizací. Přístroje na RTG oddělení jsou pravidelně kontrolovány a proměřovány, a tudíž odpovídají evropským normám týkajících se zátěže záření pro populaci.',
+		42 => 'Oddělení zdravotnických prostředků zajišťuje výdej prostředků zdravotnické techniky na poukazy tj. poukazy na léčebnou a ortopedickou pomůcku. Zároveň nabízí volně dostupný zdravotnický materiál za hotové.',
+		37 => 'Zajišťujeme vyšetření zraku lékařem bez čekání, kompletní péči o Váš zrak, včetně odborných vyšetření a aplikaci kontaktních čoček.',
 	);
 }
 
@@ -91,10 +88,28 @@ function kolf_purge_placeholder_departments() {
 }
 
 /**
+ * Smaže starý obsah CPT "sluzba" (na úvodní stránce ho nahradily zvýrazněná
+ * oddělení, viz kolf_department_highlight_overrides()). CPT už není
+ * registrovaný, ale posty vytvořené předchozím seedem by jinak v databázi
+ * zůstaly navždy.
+ */
+function kolf_purge_legacy_services() {
+	$old = get_posts( array(
+		'post_type'      => 'sluzba',
+		'posts_per_page' => -1,
+		'post_status'    => 'any',
+	) );
+	foreach ( $old as $post ) {
+		wp_delete_post( $post->ID, true );
+	}
+}
+
+/**
  * @return array legacy_id (z Department.sql) => nové WP post ID
  */
 function kolf_seed_run_departments() {
-	$map = array();
+	$map        = array();
+	$highlights = kolf_department_highlight_overrides();
 
 	foreach ( kolf_seed_departments() as $dept ) {
 		$existing = get_posts( array(
@@ -105,6 +120,7 @@ function kolf_seed_run_departments() {
 		) );
 		if ( $existing ) {
 			$map[ $dept['legacy_id'] ] = $existing[0]->ID;
+			kolf_seed_apply_highlight( $existing[0], $dept['legacy_id'], $highlights );
 			continue;
 		}
 
@@ -126,13 +142,7 @@ function kolf_seed_run_departments() {
 		update_post_meta( $post_id, 'kolf_location_specification', $dept['location_specification'] ? $dept['location_specification'] : '' );
 		update_post_meta( $post_id, 'kolf_web', $dept['web'] ? $dept['web'] : '' );
 
-		// Editorial volba, která oddělení se ukážou v boxu "Rychlá čísla" na úvodní
-		// stránce — v produkční DB tohle není, jde o rozhodnutí z návrhu webu.
-		$quick = kolf_quick_number_overrides();
-		if ( isset( $quick[ $dept['legacy_id'] ] ) ) {
-			update_post_meta( $post_id, 'kolf_quick_order', $quick[ $dept['legacy_id'] ]['order'] );
-			update_post_meta( $post_id, 'kolf_quick_label', $quick[ $dept['legacy_id'] ]['label'] );
-		}
+		kolf_seed_apply_highlight( get_post( $post_id ), $dept['legacy_id'], $highlights );
 
 		$map[ $dept['legacy_id'] ] = $post_id;
 	}
@@ -141,14 +151,49 @@ function kolf_seed_run_departments() {
 }
 
 /**
- * legacy_id (Department.Id) => pořadí a popisek v boxu "Rychlá čísla".
+ * Nastaví "Zvýraznit" a připojí marketingový popis (viz kolf_department_highlight_overrides())
+ * pod stávající obsah oddělení. Pozná se podle 'kolf_highlight_seeded', jestli už proběhlo —
+ * díky tomu funguje i jako dodatečný reseed na instalaci, kde oddělení už dřív vznikla
+ * (v3/v4), a zároveň nepřepíše pozdější ruční úpravu příznaku "Zvýraznit" v adminu.
  */
-function kolf_quick_number_overrides() {
+function kolf_seed_apply_highlight( $post, $legacy_id, $highlights ) {
+	if ( ! isset( $highlights[ $legacy_id ] ) || get_post_meta( $post->ID, 'kolf_highlight_seeded', true ) ) {
+		return;
+	}
+
+	$content = trim( $post->post_content . ( $post->post_content ? "\n\n" : '' ) . $highlights[ $legacy_id ] );
+	wp_update_post( array( 'ID' => $post->ID, 'post_content' => $content ) );
+
+	update_post_meta( $post->ID, 'kolf_highlight', 1 );
+	update_post_meta( $post->ID, 'kolf_highlight_seeded', 1 );
+}
+
+/**
+ * legacy_id (Phone.Id) => pořadí a popisek pro box "Rychlá čísla" na úvodní
+ * stránce. Editorial volba, v produkční DB tohle není.
+ */
+function kolf_phone_highlight_overrides() {
 	return array(
-		35 => array( 'order' => 2, 'label' => __( 'Lékárna', 'kolf' ) ),               // Lékárna
-		28 => array( 'order' => 3, 'label' => __( 'Rentgen', 'kolf' ) ),               // Rentgen
-		42 => array( 'order' => 4, 'label' => __( 'Zdravotnické potřeby', 'kolf' ) ),  // Zdravotnické potřeby MEDESA care
+		1162 => array( 'order' => 1, 'label' => __( 'Lékárna', 'kolf' ) ),               // 466 753 332
+		81   => array( 'order' => 2, 'label' => __( 'Rentgen', 'kolf' ) ),               // 466 753 264
+		85   => array( 'order' => 3, 'label' => __( 'Zdravotnické potřeby', 'kolf' ) ),  // 466 753 272
 	);
+}
+
+/**
+ * Nastaví "Zvýraznit" + pořadí/popisek u telefonu (viz kolf_phone_highlight_overrides()).
+ * Stejná logika jako kolf_seed_apply_highlight() u oddělení — funguje i jako
+ * dodatečný reseed a nepřepíše pozdější ruční úpravu v adminu.
+ */
+function kolf_seed_apply_phone_highlight( $phone_id, $legacy_id, $highlights ) {
+	if ( ! isset( $highlights[ $legacy_id ] ) || get_post_meta( $phone_id, 'kolf_highlight_seeded', true ) ) {
+		return;
+	}
+
+	update_post_meta( $phone_id, 'kolf_highlight', 1 );
+	update_post_meta( $phone_id, 'kolf_quick_order', $highlights[ $legacy_id ]['order'] );
+	update_post_meta( $phone_id, 'kolf_quick_label', $highlights[ $legacy_id ]['label'] );
+	update_post_meta( $phone_id, 'kolf_highlight_seeded', 1 );
 }
 
 /**
@@ -204,6 +249,8 @@ function kolf_seed_run_persons( $department_map ) {
 }
 
 function kolf_seed_run_phones( $department_map, $person_map ) {
+	$highlights = kolf_phone_highlight_overrides();
+
 	foreach ( kolf_seed_phones() as $phone ) {
 		$dept_post_id   = ( null !== $phone['department_legacy_id'] && isset( $department_map[ $phone['department_legacy_id'] ] ) )
 			? $department_map[ $phone['department_legacy_id'] ] : 0;
@@ -221,6 +268,7 @@ function kolf_seed_run_phones( $department_map, $person_map ) {
 			'meta_value'     => $phone['legacy_id'],
 		) );
 		if ( $existing ) {
+			kolf_seed_apply_phone_highlight( $existing[0]->ID, $phone['legacy_id'], $highlights );
 			continue;
 		}
 
@@ -241,6 +289,8 @@ function kolf_seed_run_phones( $department_map, $person_map ) {
 		if ( $person_post_id ) {
 			update_post_meta( $post_id, 'kolf_phone_person_id', $person_post_id );
 		}
+
+		kolf_seed_apply_phone_highlight( $post_id, $phone['legacy_id'], $highlights );
 	}
 }
 
@@ -410,49 +460,23 @@ function kolf_seed_run_menu( $page_map ) {
 	}
 }
 
-function kolf_seed_run_services() {
-	$order = 0;
-	foreach ( kolf_seed_services() as $service ) {
-		list( $name, $subtitle, $meta, $body ) = $service;
-
-		if ( get_page_by_title( $name, OBJECT, 'sluzba' ) ) {
-			$order++;
-			continue;
-		}
-
-		$post_id = wp_insert_post( array(
-			'post_type'    => 'sluzba',
-			'post_title'   => $name,
-			'post_content' => $body,
-			'post_status'  => 'publish',
-			'menu_order'   => $order,
-		) );
-
-		if ( ! is_wp_error( $post_id ) && $post_id ) {
-			update_post_meta( $post_id, 'kolf_subtitle', $subtitle );
-			update_post_meta( $post_id, 'kolf_meta', $meta );
-		}
-		$order++;
-	}
-}
-
 function kolf_run_seed() {
-	if ( get_option( 'kolf_seeded_v4' ) ) {
+	if ( get_option( 'kolf_seeded_v6' ) ) {
 		return;
 	}
 
 	kolf_purge_placeholder_departments();
+	kolf_purge_legacy_services();
 
 	$department_map = kolf_seed_run_departments();
 	$person_map      = kolf_seed_run_persons( $department_map );
 	kolf_seed_run_phones( $department_map, $person_map );
 	kolf_seed_run_hours( $department_map, $person_map );
-	kolf_seed_run_services();
 
 	$page_map = kolf_seed_run_pages();
 	kolf_seed_run_menu( $page_map );
 
-	update_option( 'kolf_seeded_v4', 1 );
+	update_option( 'kolf_seeded_v6', 1 );
 	flush_rewrite_rules();
 }
 add_action( 'after_switch_theme', 'kolf_run_seed' );
@@ -473,7 +497,7 @@ add_action( 'after_switch_theme', 'kolf_flush_rewrites_on_activation' );
  */
 function kolf_maybe_reseed() {
 	if ( isset( $_GET['kolf_reseed'] ) && current_user_can( 'manage_options' ) ) {
-		delete_option( 'kolf_seeded_v4' );
+		delete_option( 'kolf_seeded_v6' );
 		kolf_run_seed();
 		wp_safe_redirect( remove_query_arg( 'kolf_reseed' ) );
 		exit;

@@ -2,10 +2,10 @@
 /**
  * Jednoduché vlastní meta boxy — bez ACF nebo jiného pluginu.
  *
- * Telefonní čísla (CPT "telefon") se nikde nespravují samostatně — zadávají se
- * rovnou ve formuláři oddělení/osoby jako opakovatelný seznam a na pozadí se
- * ukládají/mažou jako vlastní záznamy propojené přes kolf_phone_department_id
- * / kolf_phone_person_id.
+ * Telefonní čísla (CPT "telefon") se přidávají/mažou přes opakovatelný seznam
+ * u oddělení/osoby (jako vlastní záznamy propojené přes kolf_phone_department_id
+ * / kolf_phone_person_id) — samostatná sekce "Telefony" v adminu slouží
+ * k přehledu a k zaškrtnutí "Zvýraznit" (box "Rychlá čísla" na úvodní stránce).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -13,22 +13,24 @@ defined( 'ABSPATH' ) || exit;
 function kolf_register_meta_boxes() {
 	add_meta_box( 'kolf_oddeleni_meta', __( 'Údaje o oddělení', 'kolf' ), 'kolf_render_oddeleni_meta_box', 'oddeleni', 'normal', 'default' );
 	add_meta_box( 'kolf_osoba_meta', __( 'Údaje o osobě', 'kolf' ), 'kolf_render_osoba_meta_box', 'osoba', 'normal', 'default' );
-	add_meta_box( 'kolf_sluzba_meta', __( 'Údaje o službě', 'kolf' ), 'kolf_render_sluzba_meta_box', 'sluzba', 'side', 'default' );
+	add_meta_box( 'kolf_telefon_meta', __( 'Rychlá čísla', 'kolf' ), 'kolf_render_telefon_meta_box', 'telefon', 'side', 'default' );
 }
 add_action( 'add_meta_boxes', 'kolf_register_meta_boxes' );
 
 function kolf_render_oddeleni_meta_box( $post ) {
 	wp_nonce_field( 'kolf_save_oddeleni_meta', 'kolf_oddeleni_meta_nonce' );
 	$is_ordination = get_post_meta( $post->ID, 'kolf_is_ordination', true );
+	$highlight     = get_post_meta( $post->ID, 'kolf_highlight', true );
 	$floor         = get_post_meta( $post->ID, 'kolf_floor', true );
 	$door_number   = get_post_meta( $post->ID, 'kolf_door_number', true );
 	$location_spec = get_post_meta( $post->ID, 'kolf_location_specification', true );
 	$web           = get_post_meta( $post->ID, 'kolf_web', true );
-	$quick_order   = get_post_meta( $post->ID, 'kolf_quick_order', true );
-	$quick_label   = get_post_meta( $post->ID, 'kolf_quick_label', true );
 	?>
 	<p>
 		<label><input type="checkbox" name="kolf_is_ordination" value="1" <?php checked( $is_ordination, 1 ); ?>> <?php esc_html_e( 'Jde o ordinaci/ambulanci (ne provozní místnost typu lékárna, WC, ředitelství…)', 'kolf' ); ?></label>
+	</p>
+	<p>
+		<label><input type="checkbox" name="kolf_highlight" value="1" <?php checked( $highlight, 1 ); ?>> <?php esc_html_e( 'Zvýraznit (zobrazit v sekci „Zdravotnické služby“ na úvodní stránce)', 'kolf' ); ?></label>
 	</p>
 	<p>
 		<label for="kolf_floor"><strong><?php esc_html_e( 'Patro', 'kolf' ); ?></strong></label><br>
@@ -47,16 +49,8 @@ function kolf_render_oddeleni_meta_box( $post ) {
 		<textarea id="kolf_location_specification" name="kolf_location_specification" rows="4" style="width:100%"><?php echo esc_textarea( $location_spec ); ?></textarea>
 	</p>
 	<hr>
-	<p>
-		<label for="kolf_quick_order"><strong><?php esc_html_e( 'Pořadí v „Rychlá čísla“ na úvodní stránce', 'kolf' ); ?></strong></label><br>
-		<input type="number" id="kolf_quick_order" name="kolf_quick_order" value="<?php echo esc_attr( $quick_order ); ?>" min="0" step="1" placeholder="0 = nezobrazovat">
-	</p>
-	<p>
-		<label for="kolf_quick_label"><strong><?php esc_html_e( 'Krátký popisek pro „Rychlá čísla“ (nepovinné)', 'kolf' ); ?></strong></label><br>
-		<input type="text" id="kolf_quick_label" name="kolf_quick_label" value="<?php echo esc_attr( $quick_label ); ?>" style="width:100%" placeholder="Jinak se použije název oddělení">
-	</p>
-	<hr>
 	<p><strong><?php esc_html_e( 'Telefonní čísla oddělení', 'kolf' ); ?></strong></p>
+	<p class="description"><?php esc_html_e( 'Zvýraznění pro box „Rychlá čísla“ na úvodní stránce se nastavuje u konkrétního čísla — Telefony v levém menu.', 'kolf' ); ?></p>
 	<?php kolf_render_phone_repeater( $post->ID, 'kolf_phone_department_id' ); ?>
 	<hr>
 	<p><strong><?php esc_html_e( 'Ordinační / provozní hodiny oddělení', 'kolf' ); ?></strong></p>
@@ -117,6 +111,7 @@ function kolf_render_osoba_meta_box( $post ) {
 	</p>
 	<hr>
 	<p><strong><?php esc_html_e( 'Telefonní čísla osoby', 'kolf' ); ?></strong></p>
+	<p class="description"><?php esc_html_e( 'Zvýraznění pro box „Rychlá čísla“ na úvodní stránce se nastavuje u konkrétního čísla — Telefony v levém menu.', 'kolf' ); ?></p>
 	<?php kolf_render_phone_repeater( $post->ID, 'kolf_phone_person_id' ); ?>
 	<hr>
 	<p><strong><?php esc_html_e( 'Ordinační / provozní hodiny osoby', 'kolf' ); ?></strong></p>
@@ -124,19 +119,28 @@ function kolf_render_osoba_meta_box( $post ) {
 	<?php
 }
 
-function kolf_render_sluzba_meta_box( $post ) {
-	wp_nonce_field( 'kolf_save_sluzba_meta', 'kolf_sluzba_meta_nonce' );
-	$subtitle = get_post_meta( $post->ID, 'kolf_subtitle', true );
-	$meta     = get_post_meta( $post->ID, 'kolf_meta', true );
+function kolf_render_telefon_meta_box( $post ) {
+	wp_nonce_field( 'kolf_save_telefon_meta', 'kolf_telefon_meta_nonce' );
+	$highlight = get_post_meta( $post->ID, 'kolf_highlight', true );
+	$order     = get_post_meta( $post->ID, 'kolf_quick_order', true );
+	$label     = get_post_meta( $post->ID, 'kolf_quick_label', true );
+	$owner     = kolf_quick_phone_owner_label( $post->ID );
 	?>
+	<?php if ( $owner ) : ?>
+		<p class="description"><?php echo esc_html( sprintf( __( 'Patří k: %s', 'kolf' ), $owner ) ); ?></p>
+	<?php endif; ?>
 	<p>
-		<label for="kolf_subtitle"><strong><?php esc_html_e( 'Podtitul', 'kolf' ); ?></strong></label><br>
-		<input type="text" id="kolf_subtitle" name="kolf_subtitle" value="<?php echo esc_attr( $subtitle ); ?>" style="width:100%">
+		<label><input type="checkbox" name="kolf_highlight" value="1" <?php checked( $highlight, 1 ); ?>> <?php esc_html_e( 'Zvýraznit (zobrazit v boxu „Rychlá čísla“ na úvodní stránce)', 'kolf' ); ?></label>
 	</p>
 	<p>
-		<label for="kolf_meta"><strong><?php esc_html_e( 'Doplňující řádek (patro, telefon, web)', 'kolf' ); ?></strong></label><br>
-		<input type="text" id="kolf_meta" name="kolf_meta" value="<?php echo esc_attr( $meta ); ?>" style="width:100%" placeholder="Přízemí · 800 420 420">
+		<label for="kolf_quick_order"><strong><?php esc_html_e( 'Pořadí v „Rychlá čísla“', 'kolf' ); ?></strong></label><br>
+		<input type="number" id="kolf_quick_order" name="kolf_quick_order" value="<?php echo esc_attr( $order ); ?>" min="0" step="1">
 	</p>
+	<p>
+		<label for="kolf_quick_label"><strong><?php esc_html_e( 'Krátký popisek (nepovinné)', 'kolf' ); ?></strong></label><br>
+		<input type="text" id="kolf_quick_label" name="kolf_quick_label" value="<?php echo esc_attr( $label ); ?>" style="width:100%" placeholder="<?php echo esc_attr( $owner ? $owner : __( 'Jinak se použije název přiřazeného oddělení/osoby', 'kolf' ) ); ?>">
+	</p>
+	<p class="description"><?php esc_html_e( 'Samotné číslo se mění v poli „Název“ nahoře.', 'kolf' ); ?></p>
 	<?php
 }
 
@@ -180,12 +184,11 @@ function kolf_save_meta_boxes( $post_id ) {
 			return;
 		}
 		update_post_meta( $post_id, 'kolf_is_ordination', isset( $_POST['kolf_is_ordination'] ) ? 1 : 0 );
+		update_post_meta( $post_id, 'kolf_highlight', isset( $_POST['kolf_highlight'] ) ? 1 : 0 );
 		update_post_meta( $post_id, 'kolf_floor', isset( $_POST['kolf_floor'] ) && '' !== $_POST['kolf_floor'] ? intval( $_POST['kolf_floor'] ) : '' );
 		update_post_meta( $post_id, 'kolf_door_number', isset( $_POST['kolf_door_number'] ) && '' !== $_POST['kolf_door_number'] ? intval( $_POST['kolf_door_number'] ) : '' );
 		update_post_meta( $post_id, 'kolf_web', isset( $_POST['kolf_web'] ) ? esc_url_raw( $_POST['kolf_web'] ) : '' );
 		update_post_meta( $post_id, 'kolf_location_specification', isset( $_POST['kolf_location_specification'] ) ? wp_kses_post( $_POST['kolf_location_specification'] ) : '' );
-		update_post_meta( $post_id, 'kolf_quick_order', isset( $_POST['kolf_quick_order'] ) ? intval( $_POST['kolf_quick_order'] ) : 0 );
-		update_post_meta( $post_id, 'kolf_quick_label', isset( $_POST['kolf_quick_label'] ) ? sanitize_text_field( $_POST['kolf_quick_label'] ) : '' );
 
 		kolf_save_phone_repeater( $post_id, 'kolf_phone_department_id' );
 		kolf_save_hours_repeater( $post_id, 'kolf_hours_department_id' );
@@ -208,15 +211,19 @@ function kolf_save_meta_boxes( $post_id ) {
 		kolf_save_hours_repeater( $post_id, 'kolf_hours_person_id' );
 	}
 
-	if ( isset( $_POST['kolf_sluzba_meta_nonce'] ) && wp_verify_nonce( $_POST['kolf_sluzba_meta_nonce'], 'kolf_save_sluzba_meta' ) ) {
+	if ( isset( $_POST['kolf_telefon_meta_nonce'] ) && wp_verify_nonce( $_POST['kolf_telefon_meta_nonce'], 'kolf_save_telefon_meta' ) ) {
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		if ( isset( $_POST['kolf_subtitle'] ) ) {
-			update_post_meta( $post_id, 'kolf_subtitle', sanitize_text_field( $_POST['kolf_subtitle'] ) );
-		}
-		if ( isset( $_POST['kolf_meta'] ) ) {
-			update_post_meta( $post_id, 'kolf_meta', sanitize_text_field( $_POST['kolf_meta'] ) );
+		update_post_meta( $post_id, 'kolf_highlight', isset( $_POST['kolf_highlight'] ) ? 1 : 0 );
+		update_post_meta( $post_id, 'kolf_quick_order', isset( $_POST['kolf_quick_order'] ) ? intval( $_POST['kolf_quick_order'] ) : 0 );
+		update_post_meta( $post_id, 'kolf_quick_label', isset( $_POST['kolf_quick_label'] ) ? sanitize_text_field( $_POST['kolf_quick_label'] ) : '' );
+
+		// Číslo se edituje přes standardní pole "Název" — drž kolf_phone_number
+		// (to čte zbytek šablony) v souladu s ním.
+		if ( isset( $_POST['post_title'] ) ) {
+			$number = preg_replace( '/\s+/', '', sanitize_text_field( $_POST['post_title'] ) );
+			update_post_meta( $post_id, 'kolf_phone_number', $number );
 		}
 	}
 }
@@ -477,3 +484,20 @@ function kolf_osoba_column_content( $column, $post_id ) {
 	}
 }
 add_action( 'manage_osoba_posts_custom_column', 'kolf_osoba_column_content', 10, 2 );
+
+function kolf_telefon_columns( $columns ) {
+	$columns['kolf_owner']     = __( 'Patří k', 'kolf' );
+	$columns['kolf_highlight'] = __( 'Zvýrazněno', 'kolf' );
+	return $columns;
+}
+add_filter( 'manage_telefon_posts_columns', 'kolf_telefon_columns' );
+
+function kolf_telefon_column_content( $column, $post_id ) {
+	if ( 'kolf_owner' === $column ) {
+		echo esc_html( kolf_quick_phone_owner_label( $post_id ) );
+	}
+	if ( 'kolf_highlight' === $column ) {
+		echo get_post_meta( $post_id, 'kolf_highlight', true ) ? esc_html__( 'Ano', 'kolf' ) : '—';
+	}
+}
+add_action( 'manage_telefon_posts_custom_column', 'kolf_telefon_column_content', 10, 2 );
